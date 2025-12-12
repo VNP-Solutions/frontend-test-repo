@@ -36,11 +36,44 @@ NestJS backend API for the Audit Vault compliance document management system.
 
 ## Prerequisites
 
-- Node.js (v18 or higher)
-- npm
-- Docker and Docker Compose (for local database)
+- Docker and Docker Compose (Recommended)
+- Node.js (v18 or higher) - *Optional if running via Docker*
+- npm - *Optional if running via Docker*
 
-## Project Setup
+## Quick Start (Docker)
+
+The easiest way to run the application is using Docker. This will start the database, run migrations, seed the database with test data, and start the backend server in one go.
+
+### 1. Start the Application
+
+```bash
+docker compose up --build
+```
+(Use `-d` to run in the background)
+
+The startup process automatically:
+1. Waits for the database to be ready
+2. Runs database migrations
+3. Seeds the database with sample data
+4. Starts the API server
+
+### 2. Access the API
+
+- **API Base URL**: `http://localhost:3000`
+- **Swagger Documentation**: `http://localhost:3000/api`
+
+### 3. Default Credentials
+
+The seed script creates the following test accounts:
+
+- **Admin**: `admin@auditvault.com` / `password123`
+- **Fund Manager**: `manager@funds.com` / `password123`
+- **Auditor**: `auditor@auditvault.com` / `password123`
+- **Compliance Officer**: `compliance@auditvault.com` / `password123`
+
+## Manual Setup (Development)
+
+If you prefer to run the application locally without Docker for the backend service:
 
 ### 1. Install Dependencies
 
@@ -48,25 +81,17 @@ NestJS backend API for the Audit Vault compliance document management system.
 npm install
 ```
 
-### 2. Database Setup
+### 2. Start Database Only
 
-Start the PostgreSQL database using Docker Compose:
+Start just the PostgreSQL database:
 
 ```bash
 docker compose up -d db
 ```
 
-This will start a PostgreSQL 15 container with the following default configuration:
-
-- **Host**: `localhost`
-- **Port**: `5432`
-- **Database**: `audit_vault`
-- **User**: `audit_admin`
-- **Password**: `secure_password`
-
 ### 3. Environment Variables
 
-Create a `.env` file in the `backend` directory (optional for local development, as defaults are provided in `docker-compose.yml`):
+Create a `.env` file in the `backend` directory (defaults are usually sufficient for local dev):
 
 ```env
 DATABASE_URL="postgresql://audit_admin:secure_password@localhost:5432/audit_vault?schema=public"
@@ -74,121 +99,39 @@ PORT=3000
 JWT_SECRET="your-jwt-secret-key-change-in-production"
 ```
 
-### 4. Database Migrations
-
-Generate Prisma Client and run migrations:
+### 4. Database Migrations & Seeding
 
 ```bash
 # Generate Prisma Client
 npx prisma generate
 
-# Run migrations (for development)
+# Run migrations
 npx prisma migrate dev
 
-# if the login credentials aren't working for you please run the following:
-npx prisma db seed
-
-# Or if migrations are already applied and you just need to sync:
-npx prisma migrate deploy
-```
-
-**Note**: `prisma migrate dev` will create a new migration if the database is not in sync. `prisma migrate deploy` applies existing migrations without creating new ones (useful for production or when migrations already exist).
-
-### 5. Seed the Database (Optional)
-
-Populate the database with sample data including test users, funds, and documents:
-
-```bash
+# Seed database
 npx prisma db seed
 ```
 
-The seed script creates test accounts with the following credentials:
-
-- **Admin**: `admin@auditvault.com` / `password123`
-- **Fund Manager**: `manager@funds.com` / `password123`
-- **Auditor**: `auditor@auditvault.com` / `password123`
-- **Compliance Officer**: `compliance@auditvault.com` / `password123`
-
-## Running the Application
-
-### Development Mode
+### 5. Start Server
 
 ```bash
+# Development mode
 npm run start:dev
+
+# Watch mode
+npm run start:debug
 ```
-
-The server will start on `http://localhost:3000` (or the port specified in `PORT` environment variable).
-
-### Production Mode
-
-```bash
-npm run build
-npm run start:prod
-```
-
-### Watch Mode (Development)
-
-```bash
-npm run start:dev
-```
-
-## API Documentation
-
-Once the server is running, access the Swagger API documentation at:
-
-**http://localhost:3000/api**
-
-The Swagger UI provides an interactive interface to explore and test all API endpoints.
-
-## Available Scripts
-
-- `npm run start` - Start the application
-- `npm run start:dev` - Start in watch mode (development)
-- `npm run start:debug` - Start in debug mode
-- `npm run start:prod` - Start in production mode
-- `npm run build` - Build the application
-- `npm run format` - Format code with Prettier
-- `npm run lint` - Run ESLint
-- `npm test` - Run unit tests
-- `npm run test:watch` - Run tests in watch mode
-- `npm run test:cov` - Run tests with coverage
-- `npm run test:e2e` - Run end-to-end tests
 
 ## Database Management
 
-### Prisma Studio (Database GUI)
+### Prisma Studio
 
-Launch Prisma Studio to visually browse and edit your database:
+To visually browse and edit your database:
 
 ```bash
 npx prisma studio
 ```
-
-This will open a web interface at `http://localhost:5555`.
-
-### Reset Database
-
-To reset the database (⚠️ **Warning**: This will delete all data):
-
-```bash
-npx prisma migrate reset
-```
-
-### Create New Migration
-
-After modifying the Prisma schema:
-
-```bash
-npx prisma migrate dev --name your_migration_name
-```
-
-### Generate Prisma Client
-
-After schema changes:
-
-```bash
-npx prisma generate
-```
+Opens at `http://localhost:5555`.
 
 ## Project Structure
 
@@ -207,34 +150,25 @@ backend/
 │   ├── chat/               # Chat functionality
 │   ├── storage/            # File storage service
 │   └── main.ts             # Application entry point
-├── docker-compose.yml      # Docker configuration for database
-└── package.json
+├── docker-compose.yml      # Docker configuration
+└── start.sh               # Container startup script
 ```
 
-## API Endpoints
-
-The main API endpoints include:
+## API Endpoints Overview
 
 - **Authentication**: `/auth/login`, `/auth/register`
-- **Documents**: `/documents` (CRUD operations)
-- **Funds**: `/funds` (CRUD operations)
-- **Users**: `/users` (User management)
-- **Audit**: `/audit` (Audit trail queries)
-- **Chat**: `/chat` (Chat sessions and messages)
+- **Documents**: `/documents`
+- **Funds**: `/funds`
+- **Users**: `/users`
+- **Audit**: `/audit`
+- **Chat**: `/chat`
 
-See the Swagger documentation at `/api` for complete endpoint details.
+Refer to Swagger docs (`/api`) for full details.
 
 ## Stopping the Application
 
-1. Stop the server: Press `Ctrl+C` in the terminal
-2. Stop the database:
+To stop all services and remove volumes (cleans up database):
 
-   ```bash
-   docker compose down
-   ```
-
-   To also remove the database volumes:
-
-   ```bash
-   docker compose down -v
-   ```
+```bash
+docker compose down -v
+```
