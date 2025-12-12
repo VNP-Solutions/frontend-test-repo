@@ -134,114 +134,111 @@ An overview page for each fund showing documents grouped by year/period, highlig
 
 ## Getting Started
 
-Follow these instructions to run the project locally.
+Follow these instructions to run the project.
 
 ### Prerequisites
 
-- **Node.js** (v18 or higher)
-- **npm** (comes with Node.js)
-- **Docker** and **Docker Compose** (for running PostgreSQL database)
-- **Git** (for cloning the repository)
+- **Docker** and **Docker Compose** (Recommended for Backend)
+- **Node.js** (v18 or higher) - Required for Frontend
+- **npm**
+- **Git**
 
-### Installation
+### Quick Start (Recommended)
 
-1.  **Clone the repository** (if you haven't already)
+This method runs the backend and database via Docker, handling all migrations and seeding automatically.
 
-    ```bash
-    git clone <repository-url>
-    cd interview-task
-    ```
+#### 1. Start Backend & Database
 
-2.  **Backend Setup**
+```bash
+cd backend
+docker compose up --build
+```
+(Use `-d` to run in the background)
 
-    ```bash
-    cd backend
-    npm install
-    ```
+The startup process automatically:
+1. Waits for the database to be ready
+2. Runs database migrations
+3. Seeds the database with sample data
+4. Starts the API server
 
-3.  **Frontend Setup**
+#### 2. Start Frontend
 
-    ```bash
-    cd frontend
-    npm install
-    ```
+Open a new terminal window:
 
-### Running the Application
+```bash
+cd frontend
+npm install
+npm run dev
+```
 
-Follow these steps in order:
+- **Frontend**: `http://localhost:3001`
+- **Backend API**: `http://localhost:3000`
+- **Swagger Docs**: `http://localhost:3000/api`
 
-1.  **Start the Database**
+### Manual Setup (Development)
 
-    ```bash
-    cd backend
-    docker compose up -d db
-    ```
+If you prefer to run the backend locally without Docker (except for the database):
 
-    This will start a PostgreSQL database in a Docker container. Wait a few seconds for the database to be ready.
+#### 1. Install Dependencies
 
-2.  **Set up the Database Schema**
+```bash
+# Backend
+cd backend
+npm install
 
-    Generate Prisma Client and run database migrations:
+# Frontend
+cd frontend
+npm install
+```
 
-    ```bash
-    cd backend
-    npx prisma generate
-    npx prisma migrate dev ( optional )
-    npx prisma db seed
-    ```
+#### 2. Start Database Only
 
-3.  **Configure Environment Variables** (if needed)
+```bash
+cd backend
+docker compose up -d db
+```
 
-    The backend uses environment variables. For local development with Docker, the database connection is configured in `docker-compose.yml`. If you need to override defaults, create a `.env` file in the `backend` directory:
+#### 3. Environment Variables
 
-    ```env
-    DATABASE_URL="postgresql://audit_admin:secure_password@localhost:5432/audit_vault?schema=public"
-    PORT=3000
-    ```
+Create a `.env` file in the `backend` directory:
 
-4.  **Start the Backend Server**
+```env
+DATABASE_URL="postgresql://audit_admin:secure_password@localhost:5432/audit_vault?schema=public"
+PORT=3000
+JWT_SECRET="your-jwt-secret-key-change-in-production"
+```
 
-    ```bash
-    cd backend
-    npm run start:dev
-    ```
+#### 4. Migrations & Seeding
 
-    The backend server will run on `http://localhost:3000`. You can access the API documentation at `http://localhost:3000/api` (Swagger UI).
+```bash
+cd backend
+npx prisma generate
+npx prisma migrate dev
+npx prisma db seed
+```
 
-5.  **Start the Frontend Application**
+#### 5. Start Services
 
-    Open a new terminal window:
+Terminal 1 (Backend):
+```bash
+cd backend
+npm run start:dev
+```
 
-    ```bash
-    cd frontend
-    npm run dev
-    ```
+Terminal 2 (Frontend):
+```bash
+cd frontend
+npm run dev
+```
 
-    The frontend application will be available at `http://localhost:3001`.
+## Stopping the Application
 
-### Accessing the Application
+To stop all backend services and remove volumes:
 
-- **Frontend**: Open your browser and navigate to `http://localhost:3001`
-- **Backend API**: Available at `http://localhost:3000`
-- **API Documentation**: Available at `http://localhost:3000/api` (Swagger UI)
-
-### Stopping the Application
-
-1. Stop the frontend: Press `Ctrl+C` in the frontend terminal
-2. Stop the backend: Press `Ctrl+C` in the backend terminal
-3. Stop the database:
-
-   ```bash
-   cd backend
-   docker compose down
-   ```
-
-   To remove the database volumes (clears all data):
-
-   ```bash
-   cd backend
-   docker compose down -v
-   ```
+```bash
+cd backend
+docker compose down -v
+```
 
 ## Test Credentials
 
